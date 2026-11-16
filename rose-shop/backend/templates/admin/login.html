@@ -1,0 +1,39 @@
+{% extends "admin/login.html" %}
+{% load i18n %}
+
+{% block content %}
+{{ block.super }}
+<script>
+(function () {
+  const password = document.querySelector('input[name="password"]');
+  if (!password) return;
+  password.id = password.id || 'id_password';
+  password.autocomplete = 'current-password';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'input-group-text';
+  toggle.style.cursor = 'pointer';
+  toggle.setAttribute('aria-controls', password.id);
+  toggle.setAttribute('aria-pressed', 'false');
+  const showLabel = '{% translate "Show password" %}';
+  const hideLabel = '{% translate "Hide password" %}';
+  toggle.setAttribute('aria-label', showLabel);
+  toggle.title = showLabel;
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-eye';
+  icon.setAttribute('aria-hidden', 'true');
+  toggle.appendChild(icon);
+  const lock = password.parentElement.querySelector('.input-group-text');
+  if (lock) lock.replaceWith(toggle);
+  else password.after(toggle);
+  toggle.addEventListener('click', function () {
+    const visible = password.type === 'password';
+    password.type = visible ? 'text' : 'password';
+    toggle.setAttribute('aria-pressed', String(visible));
+    toggle.setAttribute('aria-label', visible ? hideLabel : showLabel);
+    toggle.title = visible ? hideLabel : showLabel;
+    icon.className = visible ? 'fas fa-eye-slash' : 'fas fa-eye';
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load i18n jazzmin log %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block content_title %}Dashboard{% endblock %}
+{% block content %}
+{% get_side_menu using="app_list" as dashboard_list %}
+<div class="rose-shop-dashboard">
+  <header class="rose-shop-welcome">
+    <div><p class="rose-shop-eyebrow">Rose Shop · STORE MANAGEMENT</p><h2>Your store, at a glance</h2><p>Manage orders and update stock by size and colour.</p></div>
+  </header>
+  {% if admin_unread_counts %}
+  <section class="rose-shop-summary" aria-label="Needs attention">
+    {% for entry in admin_unread_counts %}
+    <a class="rose-shop-stat" href="{{ entry.url }}?status__exact=pending">
+      <span class="rose-shop-stat-number">{{ entry.count }}</span>
+      <span>Orders awaiting confirmation<small>View and manage →</small></span>
+    </a>
+    {% endfor %}
+  </section>
+  {% endif %}
+  <div class="rose-shop-dashboard-layout">
+    <section class="rose-shop-modules" aria-label="Store management">
+      {% for app in dashboard_list %}
+      <article class="rose-shop-module">
+        <header><h3>{{ app.name }}</h3>{% if app.app_label == 'products' %}<p>Product lines → Categories → Products</p>{% endif %}</header>
+        {% for model in app.models %}
+        <div class="rose-shop-model-row">
+          {% if model.url %}<a class="rose-shop-model-name" href="{{ model.url }}"><i class="{{ model.icon }}" aria-hidden="true"></i>{{ model.name }}</a>{% else %}<span>{{ model.name }}</span>{% endif %}
+          <div class="rose-shop-model-actions">
+            {% if model.add_url %}<a href="{{ model.add_url }}" class="rose-shop-add" aria-label="Add {{ model.name }}">+ {% trans 'Add' %}</a>{% endif %}
+            {% if model.url %}<a href="{{ model.url }}" class="rose-shop-open" aria-label="Open {{ model.name }}">{% trans 'View' %} →</a>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </article>
+      {% endfor %}
+    </section>
+    <aside class="rose-shop-activity">
+      <h3>{% trans 'Recent actions' %}</h3>
+      {% get_admin_log 6 as admin_log for_user user %}
+      {% for entry in admin_log %}
+      <div class="rose-shop-activity-entry">
+        <small>{{ entry.action_time|timesince }} ago</small>
+        {% if entry.is_deletion or not entry.get_admin_url %}<span>{{ entry.object_repr }}</span>{% else %}<a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>{% endif %}
+        <small>{% if entry.is_addition %}Added{% elif entry.is_deletion %}Deleted{% else %}Updated{% endif %}</small>
+      </div>
+      {% empty %}<p>{% trans 'None available' %}</p>{% endfor %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@ if not ORDER_API_TOKEN:
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
     'apps.orders',
@@ -27,11 +28,13 @@ MIDDLEWARE = [
 ]
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [BASE_DIR / 'templates'],
     'APP_DIRS': True,
     'OPTIONS': {'context_processors': [
         'django.template.context_processors.request',
         'django.contrib.auth.context_processors.auth',
         'django.contrib.messages.context_processors.messages',
+        'apps.orders.context_processors.pending_orders',
     ]},
 }]
 ROOT_URLCONF = 'config.urls'
@@ -47,3 +50,37 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+STATICFILES_DIRS = [BASE_DIR / 'config' / 'static']
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'Rose Shop Admin',
+    'site_header': 'Rose Shop',
+    'site_brand': 'Rose Shop',
+    'welcome_sign': 'Welcome to Rose Shop',
+    'copyright': 'Rose Shop',
+    'order_with_respect_to': ['orders', 'orders.order', 'orders.stockvariant', 'auth'],
+    'topmenu_links': [
+        {'name': 'View Store', 'url': os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000'), 'new_window': True},
+    ],
+    'icons': {
+        'orders.order': 'fas fa-shopping-bag',
+        'orders.stockvariant': 'fas fa-boxes',
+        'auth.user': 'fas fa-user',
+        'auth.group': 'fas fa-users',
+    },
+    'custom_css': 'admin/css/jazzmin_custom.css',
+}
+JAZZMIN_UI_TWEAKS = {
+    'brand_colour': 'navbar-danger',
+    'accent': 'accent-danger',
+    'navbar': 'navbar-dark',
+    'navbar_fixed': True,
+    'sidebar_fixed': True,
+    'sidebar': 'sidebar-dark-danger',
+    'button_classes': {
+        'primary': 'btn-primary', 'secondary': 'btn-secondary',
+        'info': 'btn-dark', 'warning': 'btn-warning', 'success': 'btn-success',
+        'danger': 'btn-danger',
+    },
+}
