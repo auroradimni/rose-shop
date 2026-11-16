@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import { loadCatalog, offlineCatalog } from '@/lib/catalog';
-import { SHOP, TRENDS } from '@/lib/config';
+import { SHOP } from '@/lib/config';
 
 export default async function Home({ searchParams }) {
-  const { products, categories, hero } = (await loadCatalog()) ?? offlineCatalog;
+  const { products, categories, hero, trends } = (await loadCatalog()) ?? offlineCatalog;
   const { k, q, sort, sale } = searchParams || {};
   const filtered = !!(k || q || sort || sale);
   let list = products.filter((p) => (!k || p.cat === k) && (!sale || p.old) && (!q || p.name.toLowerCase().includes(q.toLowerCase())));
@@ -47,17 +47,17 @@ export default async function Home({ searchParams }) {
           </section>
 
           {/* Fashion Nova: "The Trend Report" */}
-          <section className="wide" id="trendet">
+          {trends.length > 0 && <section className="wide" id="trendet">
             <h2 className="fnh">The Trend Report</h2>
             <div className="trends">
-              {TRENDS.map((t) => (
-                <Link key={t.title} href={t.href} className="trend">
-                  {t.image ? <img src={t.image} alt={t.title} className="trendimg" /> : <div style={{ background: `linear-gradient(170deg, ${t.tone[0]}, ${t.tone[1]})` }} />}
+              {trends.map((t) => (
+                <Link key={t.id ?? t.title} href={t.href} className="trend">
+                  {t.image ? <img src={t.image} alt={t.title} className="trendimg" /> : <div aria-hidden="true" />}
                   <span>{t.title} ›</span>
                 </Link>
               ))}
             </div>
-          </section>
+          </section>}
         </>
       )}
 

@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.utils.html import format_html
 from django import forms
 from django.urls import reverse
-from .models import Category, Product, ProductVariant, ProductImage, HeroSlide
+from .models import Category, Product, ProductVariant, ProductImage, HeroSlide, TrendCard
 
 COLORS = ['Black', 'White', 'Red', 'Burgundy', 'Beige', 'Navy', 'Pink', 'Grey', 'Brown', 'Green', 'Blue', 'Yellow', 'Orange', 'Purple']
 SIZES = ProductVariant.SIZES
@@ -139,12 +140,12 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
     list_display = [
         'name', 'order', 'category', 'price', 'original_price',
-        'discount_badge', 'is_new', 'is_bestseller', 'is_sale', 'is_active', 'created_at'
+        'discount_badge', 'is_new', 'is_bestseller', 'is_trending', 'is_sale', 'is_active', 'created_at'
     ]
-    list_filter = ['category', 'is_new', 'is_bestseller', 'is_sale', 'is_active']
+    list_filter = ['category', 'is_new', 'is_bestseller', 'is_trending', 'is_sale', 'is_active']
     list_select_related = ['category']
 
-    list_editable = ['order', 'is_new', 'is_bestseller', 'is_active']
+    list_editable = ['order', 'is_new', 'is_bestseller', 'is_trending', 'is_active']
     readonly_fields = ['is_sale', 'discount_preview']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
@@ -167,7 +168,7 @@ class ProductAdmin(admin.ModelAdmin):
             ),
         }),
         ('Flags', {
-            'fields': ('is_new', 'is_bestseller', 'is_active'),
+            'fields': ('is_new', 'is_bestseller', 'is_trending', 'is_active'),
         }),
         ('Colors & sizes', {
             'fields': ('colors', 'sizes'),
@@ -233,3 +234,20 @@ class HeroSlideAdmin(admin.ModelAdmin):
                 choices.append((f'/?k={cat.slug}#koleksioni', cat.name))
             kwargs['widget'] = forms.Select(choices=choices)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+@admin.register(TrendCard)
+class TrendCardAdmin(admin.ModelAdmin):
+    list_display = ('title', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    fields = ('title', 'image', 'image_preview', 'href', 'order', 'is_active')
+    readonly_fields = ('image_preview',)
+    search_fields = ('title',)
+
+    @admin.display(description='Current image')
+    def image_preview(self, obj):
+        if not obj:
+            return ''
+        url = obj.image.url if obj.image else ''
+        if not url and obj.default_image:
+            url = f'{settings.FRONTEND_URL.rstrip("/")}{obj.default_image}'
+        return format_html('<img src="{}" alt="" width="120">', url) if url else ''

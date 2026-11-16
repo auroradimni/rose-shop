@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -57,6 +58,7 @@ class Product(models.Model):
     )
     is_new = models.BooleanField(default=False)
     is_bestseller = models.BooleanField(default=False)
+    is_trending = models.BooleanField(default=False, verbose_name='Show in Trend Report')
     is_sale = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -224,3 +226,22 @@ class HeroSlide(models.Model):
             raise ValidationError({'image_2': 'Required when desktop shows 2 or 3 photos.'})
         if self.desktop_photos >= 3 and not self.image_3:
             raise ValidationError({'image_3': 'Required when desktop shows 3 photos.'})
+
+class TrendCard(models.Model):
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='trends/', blank=True)
+    default_image = models.CharField(max_length=200, blank=True, editable=False)
+    href = models.CharField(
+        max_length=200, default='/#koleksioni',
+        validators=[RegexValidator(r'^/(?!/)[^\\\s]*\Z', 'Enter a link within Rose Shop starting with /.')],
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'pk']
+        verbose_name = 'Trend Report card'
+        verbose_name_plural = 'Trend Report'
+
+    def __str__(self):
+        return self.title

@@ -54,6 +54,8 @@ CSRF_COOKIE_SECURE = not DEBUG
 
 STATICFILES_DIRS = [BASE_DIR / 'config' / 'static']
 
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000')
+
 JAZZMIN_SETTINGS = {
     'site_title': 'Rose Shop Admin',
     'site_header': 'Rose Shop',
@@ -61,15 +63,16 @@ JAZZMIN_SETTINGS = {
     'welcome_sign': 'Welcome to Rose Shop',
     'copyright': 'Rose Shop',
     'order_with_respect_to': ['orders', 'products', 'products.category',
-                              'products.product', 'products.heroslide', 'site', 'auth'],
+                              'products.product', 'products.heroslide', 'products.trendcard', 'site', 'auth'],
     'topmenu_links': [
-        {'name': 'View Store', 'url': os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000'), 'new_window': True},
+        {'name': 'View Store', 'url': FRONTEND_URL, 'new_window': True},
     ],
     'icons': {
         'orders.order': 'fas fa-shopping-bag',
         'products.category': 'fas fa-tags',
         'products.product': 'fas fa-tshirt',
         'products.heroslide': 'fas fa-images',
+        'products.trendcard': 'fas fa-chart-line',
         'site.sitesettings': 'fas fa-cog',
         'auth.user': 'fas fa-user',
         'auth.group': 'fas fa-users',

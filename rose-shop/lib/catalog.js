@@ -1,3 +1,4 @@
+import { TRENDS } from './config';
 import { categories as originalCategories, products as originals } from './products';
 
 export async function loadCatalog() {
@@ -11,6 +12,10 @@ export async function loadCatalog() {
     const catalog = await response.json();
     return {
       ...catalog,
+      trends: catalog.trends?.map((trend) => ({
+        ...trend,
+        image: trend.image || originals.find((item) => item.slug === trend.productSlug)?.image,
+      })) ?? TRENDS,
       products: catalog.products.map((product) => {
         const original = originals.find((item) => item.slug === product.slug);
         return {
@@ -30,4 +35,5 @@ export const offlineCatalog = {
   categories: originalCategories,
   products: originals.map((product) => ({ ...product, available: null })),
   hero: null,
+  trends: TRENDS,
 };
