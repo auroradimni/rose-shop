@@ -36,16 +36,18 @@ export default function Header({ categories }) {
         <nav>
           <Link href="/?sort=re#koleksioni">New In</Link>
           <Link href="/?sort=best#koleksioni">Best Sellers</Link>
-          <Link href="/#koleksioni">Clothing</Link>
+          <Link href="/#koleksioni">All Products</Link>
           <Link href="/?sale=1#koleksioni">Sale</Link>
           <Link href="/#trendet">Trends</Link>
         </nav>
-        <Link href="/" className="logo" aria-label={SHOP.name}><Logo size={72} /></Link>
+        <Link href="/" className="logo" aria-label={SHOP.name}><Logo /></Link>
         <div className="actions">
           {/* Fashion Nova: kërkim pill */}
-          <form action="/" className="search">
-            <Svg><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></Svg>
-            <input name="q" placeholder="Search women clothing" aria-label="Search" />
+          <form action="/#koleksioni" className="search" role="search">
+            <button type="submit" aria-label="Submit search">
+              <Svg><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></Svg>
+            </button>
+            <input type="search" name="q" placeholder="Search clothing" aria-label="Search clothing" />
           </form>
           <span className="region">AL</span>
           <Link href="/ruajtur" className="ico" aria-label="Saved items">
@@ -60,13 +62,13 @@ export default function Header({ categories }) {
       </header>
 
       {/* Fashion Nova: rreshti i dytë i kategorive */}
-      <div className="subnav">
+      <nav className="subnav" aria-label="Shop categories">
         <Link href="/?sort=re#koleksioni">New In</Link>
-        <Link href="/#koleksioni">Clothing</Link>
+        <Link href="/#koleksioni">All Products</Link>
         <Link href="/?sale=1#koleksioni">Deals</Link>
         <Link href="/?k=fustane#koleksioni">Holiday Shop <sup>NEW</sup></Link>
         {categories.map((c) => <Link key={c.slug} href={`/?k=${c.slug}#koleksioni`}>{c.name}</Link>)}
-      </div>
+      </nav>
       <Link href="/?sale=1#koleksioni" className="saleband"><b>UP TO 50% OFF</b><span>Shop now ›</span></Link>
     </>
   );
