@@ -16,7 +16,7 @@ export default function AddToCart({ p, available }) {
   return (
     <>
       <div className="opt"><b>Colour</b>
-        <div className="dots big">{p.colors.map((c) => <button key={c} onClick={() => { setColor(c); setSize(null); setErr(false); }} className={c === color ? 'on' : ''} style={{ background: c }} aria-label={c} />)}</div>
+        <div className="dots big">{p.colors.map((c) => <button key={c} onClick={() => { setColor(c); setSize(null); setErr(false); }} className={c === color ? 'on' : ''} style={{ background: c === "Beige" ? "#e6d3b3" : c === "Burgundy" ? "#800020" : c }} aria-label={c} title={c} />)}</div>
       </div>
       <div className="opt"><b>Size</b>
         <div className="sizes">{p.sizes.map((s) => <button key={s} disabled={!inStock(s)} onClick={() => { setSize(s); setErr(false); }} className={s === size ? 'on' : ''}>{s}</button>)}</div>

@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
-import { products, categories } from '@/lib/products';
+import { loadCatalog, offlineCatalog } from '@/lib/catalog';
 import { SHOP, TRENDS } from '@/lib/config';
 
-export default function Home({ searchParams }) {
+export default async function Home({ searchParams }) {
+  const { products, categories, hero } = (await loadCatalog()) ?? offlineCatalog;
   const { k, q, sort, sale } = searchParams || {};
   const filtered = !!(k || q || sort || sale);
   let list = products.filter((p) => (!k || p.cat === k) && (!sale || p.old) && (!q || p.name.toLowerCase().includes(q.toLowerCase())));
@@ -20,11 +21,21 @@ export default function Home({ searchParams }) {
       {!filtered && (
         <>
           {/* Lioness: hero i plotë me tekst poshtë majtas */}
-          <section className="hero3">
+          <section className={`hero3${hero ? ' managed-hero' : ''}`}>
+            {hero && (
+              <div className="managed-hero-images" aria-hidden="true">
+                {hero.desktopImages.map((image, index) => (
+                  <picture key={index}>
+                    {hero.mobileImage && index === 0 && <source media="(max-width: 640px)" srcSet={hero.mobileImage} />}
+                    <img src={image} alt="" />
+                  </picture>
+                ))}
+              </div>
+            )}
             <div>
-              <small>All day with {SHOP.name}</small>
-              <h1>Everyday Essentials</h1>
-              <Link href="/?sort=re#koleksioni" className="shop-now">Shop now</Link>
+              <small>{hero?.tag || `All day with ${SHOP.name}`}</small>
+              <h1>{hero?.title || 'Everyday Essentials'}</h1>
+              <Link href={hero?.href || "/?sort=re#koleksioni"} className="shop-now">Shop now</Link>
             </div>
           </section>
 

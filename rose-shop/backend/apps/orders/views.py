@@ -9,7 +9,8 @@ from django.utils.crypto import constant_time_compare
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import Order, OrderItem, StockVariant
+from apps.products.models import ProductVariant
+from .models import Order, OrderItem
 
 
 @csrf_exempt
@@ -27,14 +28,21 @@ def create_order(request):
 
     try:
         with transaction.atomic():
+            variants = {}
             for (slug, size, color), quantity in sorted(requested.items()):
-                updated = StockVariant.objects.filter(
-                    product_slug=slug, size=size, color=color, quantity__gte=quantity,
-                ).update(quantity=F('quantity') - quantity)
-                if not updated:
+                variant = ProductVariant.objects.filter(
+                    product__slug=slug, size=size, color=color,
+                    product__is_active=True, product__category__is_active=True,
+                    product__category__product_line__is_active=True,
+                )
+                if not variant.filter(stock__gte=quantity).update(stock=F('stock') - quantity):
                     raise InsufficientStock
+                variants[slug, size, color] = variant.values_list("pk", flat=True).get()
             order = Order.objects.create(**data, stock_reserved=True)
-            OrderItem.objects.bulk_create(OrderItem(order=order, **item) for item in items)
+            OrderItem.objects.bulk_create(
+                OrderItem(order=order, variant_id=variants[item['product_slug'], item['size'], item['color']], **item)
+                for item in items
+            )
     except InsufficientStock:
         return JsonResponse({'error': 'Some items are no longer available in the requested quantity.'}, status=409)
     return JsonResponse({'ok': True, 'orderId': order.pk}, status=201)
@@ -46,5 +54,5 @@ class InsufficientStock(Exception):
 
 @require_GET
 def available_stock(request, slug):
-    variants = StockVariant.objects.filter(product_slug=slug, quantity__gt=0)
+    variants = ProductVariant.objects.filter(product__slug=slug, product__is_active=True, stock__gt=0)
     return JsonResponse({'variants': list(variants.values('size', 'color'))})

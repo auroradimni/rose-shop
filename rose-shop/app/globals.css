@@ -237,3 +237,10 @@ body{background:#fff}
 .hero3{background-position:center,center 28%,center}
 
 .trendimg{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:center top}
+
+.managed-hero{position:relative;isolation:isolate}
+.managed-hero-images{position:absolute;inset:0;display:flex;z-index:-1}
+.managed-hero-images::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#1e0f1480,transparent 65%)}
+.managed-hero-images picture{flex:1;min-width:0}
+.managed-hero-images img{width:100%;height:100%;object-fit:cover}
+@media(max-width:640px){.managed-hero-images picture:not(:first-child){display:none}}

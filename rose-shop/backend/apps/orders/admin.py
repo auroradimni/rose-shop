@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Order, OrderItem, StockVariant
+from .models import Order, OrderItem
 
 
 class OrderItemInline(admin.TabularInline):
@@ -34,17 +34,4 @@ class OrderAdmin(admin.ModelAdmin):
         return False
 
     def has_add_permission(self, request):
-        return False
-
-@admin.register(StockVariant)
-class StockVariantAdmin(admin.ModelAdmin):
-    list_display = ('product_slug', 'size', 'color', 'quantity')
-    list_filter = ('product_slug',)
-    search_fields = ('product_slug',)
-    readonly_fields = ('product_slug', 'size', 'color')
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
         return False

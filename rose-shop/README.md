@@ -9,8 +9,7 @@ Porositë shkojnë te `app/api/order/route.js`, ku mund t'i lidhësh me Django, 
 
 ## Backend i porosive
 
-Django ruan porosite me pagese ne dorezim dhe statuset e tyre. Katalogu,
-cmimet dhe rregullat e transportit vine nga aplikacioni Next.js.
+Django ruan porosite me pagese ne dorezim dhe statuset e tyre. Django menaxhon katalogun dhe çmimet. Rregullat e transportit janë në Next.js.
 
 Hap PowerShell ne dosjen me `package.json` te aplikacionit. Vendos nje vlere
 sekrete per `ORDER_API_TOKEN` dhe perdor te njejten vlere ne te dy terminalet.
@@ -39,12 +38,18 @@ Per deployment vendos edhe `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS` dhe
 `ORDER_BACKEND_URL` sipas hosteve te tu. Perdore `ROSE_DB_PATH` per nje disk
 persistent dhe sherbe skedaret e admin-it pas `python backend/manage.py collectstatic`.
 
-### Stoku
+### Katalogu dhe stoku
 
-Pas migrimeve, ekzekuto `python backend/manage.py sync_stock` sa herë shton
-produkte, masa ose ngjyra te `lib/products.js`. Komanda shton variantet e reja
-me sasi zero dhe ruan sasitë ekzistuese. Vendos numrin real të njësive për çdo
-variant te **Orders → Stock variants** në panelin e administrimit. Faqja e
-produktit çaktivizon masat pa stok. Porosia ul sasinë e disponueshme dhe
-anulimi nga paneli e kthen sasinë në stok. Porositë e krijuara para këtij
-ndryshimi nuk kanë rezervuar stok.
+Ekzekuto `python backend/manage.py sync_stock` pas migrimeve për të importuar
+katalogun fillestar të Rose Shop dhe sasitë nga tabela e vjetër e stokut.
+Komanda ruan produktet e krijuara ose të ndryshuara më parë në panel.
+
+Në panel, krijo ose zgjidh një **Product line**, një **Category** dhe pastaj
+shto produktin te **Products**. Zgjidh masat dhe ngjyrat. Pas ruajtjes,
+vendos sasitë te tabela e varianteve dhe ngarko fotot. Për të fshehur një
+produkt, çaktivizoje nga paneli. Te **Hero slides** mund të ndryshosh
+bannerin e faqes kryesore. Dyqani shfaq slide-in e parë aktiv sipas renditjes.
+
+Për instalim në server, ruaje `backend/media` në disk persistent dhe
+konfiguro shërbimin e skedarëve në `/media/`. Vendos `PUBLIC_API_ORIGIN`
+me adresën publike të backend-it për fotot.

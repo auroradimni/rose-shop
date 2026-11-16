@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PROMO, SHOP } from '@/lib/config';
-import { products } from '@/lib/products';
+import { loadCatalog } from '@/lib/catalog';
 
 const invalid = () => NextResponse.json({ error: 'Invalid order' }, { status: 400 });
 const unavailable = () => NextResponse.json({ error: 'Order service unavailable' }, { status: 503 });
@@ -19,9 +19,12 @@ export async function POST(req) {
   }
   if (!Array.isArray(items) || !items.length || items.length > 100) return invalid();
 
+  const catalog = await loadCatalog();
+  if (!catalog) return unavailable();
+
   const lines = [];
   for (const item of items) {
-    const product = products.find((p) => p.id === item?.id);
+    const product = catalog.products.find((p) => p.id === item?.id);
     if (!product || !product.sizes.includes(item.size) || !product.colors.includes(item.color) ||
         !Number.isInteger(item.qty) || item.qty < 1 || item.qty > 100) return invalid();
     lines.push({

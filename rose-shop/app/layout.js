@@ -4,6 +4,7 @@ import CartProvider from '@/components/CartProvider';
 import Header from '@/components/Header';
 import ScrollTop from '@/components/ScrollTop';
 import CartDrawer from '@/components/CartDrawer';
+import { loadCatalog, offlineCatalog } from '@/lib/catalog';
 import { SHOP } from '@/lib/config';
 
 const display = Cormorant_Garamond({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600'], style: ['normal', 'italic'], variable: '--f-display' });
@@ -11,12 +12,13 @@ const body = Jost({ subsets: ['latin', 'latin-ext'], variable: '--f-body' });
 
 export const metadata = { title: `${SHOP.name} | Women’s Clothing`, description: SHOP.tagline };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const { categories } = (await loadCatalog()) ?? offlineCatalog;
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <CartProvider>
-          <Header />
+          <Header categories={categories} />
           <main>{children}</main>
           <CartDrawer />
           <ScrollTop />

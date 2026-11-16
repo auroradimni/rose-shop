@@ -15,7 +15,8 @@ INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-    'apps.orders',
+    'rest_framework', 'django_filters', 'colorfield',
+    'apps.orders', 'apps.products', 'apps.reviews', 'apps.newsletter', 'apps.site',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,13 +60,20 @@ JAZZMIN_SETTINGS = {
     'site_brand': 'Rose Shop',
     'welcome_sign': 'Welcome to Rose Shop',
     'copyright': 'Rose Shop',
-    'order_with_respect_to': ['orders', 'orders.order', 'orders.stockvariant', 'auth'],
+    'order_with_respect_to': ['orders', 'products', 'products.productline', 'products.category',
+                              'products.product', 'products.heroslide', 'reviews', 'newsletter', 'site', 'auth'],
     'topmenu_links': [
         {'name': 'View Store', 'url': os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000'), 'new_window': True},
     ],
     'icons': {
         'orders.order': 'fas fa-shopping-bag',
-        'orders.stockvariant': 'fas fa-boxes',
+        'products.productline': 'fas fa-layer-group',
+        'products.category': 'fas fa-tags',
+        'products.product': 'fas fa-tshirt',
+        'products.heroslide': 'fas fa-images',
+        'reviews.customerreview': 'fas fa-star',
+        'newsletter.newslettersubscriber': 'fas fa-paper-plane',
+        'site.sitesettings': 'fas fa-cog',
         'auth.user': 'fas fa-user',
         'auth.group': 'fas fa-users',
     },
@@ -83,4 +91,13 @@ JAZZMIN_UI_TWEAKS = {
         'info': 'btn-dark', 'warning': 'btn-warning', 'success': 'btn-success',
         'danger': 'btn-danger',
     },
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+PUBLIC_API_ORIGIN = os.getenv('PUBLIC_API_ORIGIN', 'http://127.0.0.1:8000').rstrip('/')
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': ['rest_framework.throttling.ScopedRateThrottle'],
+    'DEFAULT_THROTTLE_RATES': {'newsletter': '10/hour', 'reviews': '5/hour'},
 }

@@ -34,10 +34,15 @@ class Order(models.Model):
         with transaction.atomic():
             released = Order.objects.filter(pk=self.pk, stock_reserved=True).update(stock_reserved=False)
             if released:
+                from apps.products.models import ProductVariant
+
                 for item in self.items.order_by('product_slug', 'size', 'color'):
-                    StockVariant.objects.filter(
-                        product_slug=item.product_slug, size=item.size, color=item.color,
-                    ).update(quantity=F('quantity') + item.quantity)
+                    variants = ProductVariant.objects.filter(pk=item.variant_id) if item.variant_id else (
+                        ProductVariant.objects.filter(
+                            product__slug=item.product_slug, size=item.size, color=item.color,
+                        )
+                    )
+                    variants.update(stock=F('stock') + item.quantity)
             self.stock_reserved = False
             return super().save(*args, **kwargs)
 
@@ -49,6 +54,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    variant = models.ForeignKey('products.ProductVariant', on_delete=models.PROTECT, null=True, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product_slug = models.SlugField(max_length=200)
     product_name = models.CharField(max_length=200)

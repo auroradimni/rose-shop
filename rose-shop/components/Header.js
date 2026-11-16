@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useCart } from './CartProvider';
 import Logo from './Logo';
 import { SHOP, PROMO } from '@/lib/config';
-import { categories } from '@/lib/products';
 
 const Svg = ({ children }) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
 
@@ -21,7 +20,7 @@ function Countdown() {
   return <span className="count">Ends in: {t}</span>;
 }
 
-export default function Header() {
+export default function Header({ categories }) {
   const { count, wish, setOpen } = useCart();
   return (
     <>
