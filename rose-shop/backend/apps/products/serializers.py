@@ -3,7 +3,7 @@
 from rest_framework import serializers
 
 from config.media_urls import media_absolute_url
-from .models import Category, Product, ProductVariant, ProductImage, HeroSlide, ProductLine
+from .models import Category, Product, ProductVariant, ProductImage, HeroSlide
 
 COLOR_HEX_MAP = {
     'Black': '#1A1A1A',
@@ -51,20 +51,12 @@ def _product_thumbnail_url(request, product):
     return _absolute_url(request, media.image)
 
 
-class ProductLineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductLine
-        fields = ['id', 'name', 'slug', 'order', 'is_active']
-
-
 class CategorySerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
-    product_line = ProductLineSerializer(read_only=True)
-    product_line_slug = serializers.CharField(source='product_line.slug', read_only=True)
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'image', 'product_line', 'product_line_slug']
+        fields = ['id', 'name', 'slug', 'image']
 
     def get_image(self, obj):
         request = self.context.get('request')
@@ -150,7 +142,6 @@ class ProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     category_slug = serializers.CharField(source='category.slug', read_only=True)
-    product_line_slug = serializers.CharField(source='category.product_line.slug', read_only=True)
     is_hot = serializers.BooleanField(source='is_bestseller', read_only=True)
 
     class Meta:
@@ -159,7 +150,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'price', 'original_price',
             'discount_percent', 'colors_count', 'primary_image', 'image',
             'is_new', 'is_hot', 'is_bestseller', 'is_sale', 'category_slug',
-            'product_line_slug',
         ]
 
     def get_colors_count(self, obj):

@@ -33,7 +33,6 @@ def create_order(request):
                 variant = ProductVariant.objects.filter(
                     product__slug=slug, size=size, color=color,
                     product__is_active=True, product__category__is_active=True,
-                    product__category__product_line__is_active=True,
                 )
                 if not variant.filter(stock__gte=quantity).update(stock=F('stock') - quantity):
                     raise InsufficientStock

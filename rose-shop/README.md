@@ -44,7 +44,7 @@ Ekzekuto `python backend/manage.py sync_stock` pas migrimeve për të importuar
 katalogun fillestar të Rose Shop dhe sasitë nga tabela e vjetër e stokut.
 Komanda ruan produktet e krijuara ose të ndryshuara më parë në panel.
 
-Në panel, krijo ose zgjidh një **Product line**, një **Category** dhe pastaj
+Në panel, krijo ose zgjidh një **Category** dhe pastaj
 shto produktin te **Products**. Zgjidh masat dhe ngjyrat. Pas ruajtjes,
 vendos sasitë te tabela e varianteve dhe ngarko fotot. Për të fshehur një
 produkt, çaktivizoje nga paneli. Te **Hero slides** mund të ndryshosh

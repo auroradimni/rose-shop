@@ -15,7 +15,5 @@ urlpatterns = [
     path('api/stock/<slug:slug>/', available_stock),
     path('api/catalog/', storefront),
     path('api/products/', include('apps.products.urls')),
-    path('api/reviews/', include('apps.reviews.urls')),
-    path('api/newsletter/', include('apps.newsletter.urls')),
     path('api/site/', include('apps.site.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

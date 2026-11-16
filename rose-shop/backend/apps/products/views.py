@@ -8,10 +8,9 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as df
 
-from .models import Category, Product, HeroSlide, ProductImage, ProductLine
+from .models import Category, Product, HeroSlide, ProductImage
 from .serializers import (
     CategorySerializer,
-    ProductLineSerializer,
     ProductListSerializer,
     ProductDetailSerializer,
     HeroSlideSerializer,
@@ -26,8 +25,6 @@ class ProductPagination(PageNumberPagination):
 
 class ProductFilter(df.FilterSet):
     category = df.CharFilter(field_name='category__slug')
-    product_line = df.CharFilter(field_name='category__product_line__slug')
-    line = df.CharFilter(field_name='category__product_line__slug')
     min_price = df.NumberFilter(field_name='price', lookup_expr='gte')
     max_price = df.NumberFilter(field_name='price', lookup_expr='lte')
     is_new = df.BooleanFilter()
@@ -55,16 +52,7 @@ class ProductFilter(df.FilterSet):
 
     class Meta:
         model = Product
-        fields = ['category', 'product_line', 'line', 'is_new', 'is_hot', 'is_bestseller']
-
-
-class ProductLineViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = ProductLineSerializer
-    lookup_field = 'slug'
-    pagination_class = None
-
-    def get_queryset(self):
-        return ProductLine.objects.filter(is_active=True)
+        fields = ['category', 'is_new', 'is_hot', 'is_bestseller']
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -74,19 +62,14 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         # Light list — only featured product thumb, not every product in each category
-        qs = Category.objects.select_related('featured_product', 'product_line').prefetch_related(
+        qs = Category.objects.select_related('featured_product').prefetch_related(
             Prefetch(
                 'featured_product__images',
                 queryset=ProductImage.objects.filter(
                     media_type=ProductImage.MEDIA_IMAGE
                 ).order_by('-is_primary', 'order'),
             ),
-        ).filter(is_active=True).filter(
-            Q(product_line__isnull=True) | Q(product_line__is_active=True)
-        )
-        line = self.request.query_params.get('line') or self.request.query_params.get('product_line')
-        if line:
-            qs = qs.filter(product_line__slug=line)
+        ).filter(is_active=True)
         return qs
 
 
@@ -94,8 +77,7 @@ def _visible_products_queryset():
     """Active products in active categories (or without category)."""
     return Product.objects.filter(is_active=True).filter(
         Q(category__isnull=True) |
-        Q(category__is_active=True, category__product_line__isnull=True) |
-        Q(category__is_active=True, category__product_line__is_active=True)
+        Q(category__is_active=True)
     )
 
 
@@ -112,14 +94,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'retrieve':
             return (
                 _visible_products_queryset()
-                .select_related('category', 'category__product_line')
+                .select_related('category')
                 .prefetch_related('images', 'variants')
             )
 
         image_qs = ProductImage.objects.order_by('-is_primary', 'order')
         return (
             _visible_products_queryset()
-            .select_related('category', 'category__product_line')
+            .select_related('category')
             .annotate(_colors_count=Count('variants__color', distinct=True))
             .prefetch_related(Prefetch('images', queryset=image_qs))
         )

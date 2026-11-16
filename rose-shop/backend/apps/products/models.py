@@ -2,36 +2,9 @@ from django.db import models
 from django.utils.text import slugify
 
 
-class ProductLine(models.Model):
-    name = models.CharField(max_length=120)
-    slug = models.SlugField(unique=True, blank=True)
-    order = models.IntegerField(default=0)
-    is_active = models.BooleanField(
-        default=True,
-        help_text='Uncheck to hide this product line from the storefront.',
-    )
-
-    class Meta:
-        ordering = ['order', 'name']
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
-    product_line = models.ForeignKey(
-        ProductLine,
-        on_delete=models.PROTECT,
-        related_name='categories',
-        help_text='Required. Choose the product line this category belongs to.',
-    )
     image = models.ImageField(
         upload_to='categories/',
         blank=True,

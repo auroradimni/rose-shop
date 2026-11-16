@@ -11,7 +11,7 @@ def media_url(field):
 
 @require_GET
 def storefront(request):
-    categories = Category.objects.filter(is_active=True, product_line__is_active=True)
+    categories = Category.objects.filter(is_active=True)
     products = Product.objects.filter(is_active=True, category__in=categories).select_related(
         'category',
     ).prefetch_related('variants', 'images')

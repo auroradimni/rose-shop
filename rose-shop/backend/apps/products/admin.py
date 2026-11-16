@@ -1,47 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django import forms
-from django.db.models import Count
 from django.urls import reverse
-from .models import Category, Product, ProductVariant, ProductImage, HeroSlide, ProductLine
+from .models import Category, Product, ProductVariant, ProductImage, HeroSlide
 
 COLORS = ['Black', 'White', 'Red', 'Burgundy', 'Beige', 'Navy', 'Pink', 'Grey', 'Brown', 'Green', 'Blue', 'Yellow', 'Orange', 'Purple']
 SIZES = ProductVariant.SIZES
-
-
-@admin.register(ProductLine)
-class ProductLineAdmin(admin.ModelAdmin):
-    list_display = ['name', 'categories_link', 'products_link', 'is_active', 'order']
-    list_editable = ['is_active', 'order']
-    list_filter = ['is_active']
-    search_fields = ['name', 'slug']
-    prepopulated_fields = {'slug': ('name',)}
-    fields = ['name', 'slug', 'is_active', 'order', 'categories_link', 'products_link', 'add_category_link']
-    readonly_fields = ['categories_link', 'products_link', 'add_category_link']
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).annotate(category_count=Count('categories', distinct=True))
-
-    @admin.display(description='Categories')
-    def categories_link(self, obj):
-        if not obj.pk:
-            return 'Save the product line first.'
-        return format_html('<a href="{}?product_line__id__exact={}">View categories ({}) →</a>',
-                           reverse('admin:products_category_changelist'), obj.pk, obj.category_count)
-
-    @admin.display(description='Products')
-    def products_link(self, obj):
-        if not obj.pk:
-            return '—'
-        return format_html('<a href="{}?category__product_line__id__exact={}">View products →</a>',
-                           reverse('admin:products_product_changelist'), obj.pk)
-
-    @admin.display(description='Add category')
-    def add_category_link(self, obj):
-        if not obj.pk:
-            return 'Save the product line first.'
-        return format_html('<a href="{}?product_line={}">+ Add category to {}</a>',
-                           reverse('admin:products_category_add'), obj.pk, obj.name)
 
 
 class ProductAdminForm(forms.ModelForm):
@@ -81,9 +45,6 @@ class ProductAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.select_related('product_line').order_by('product_line__order', 'product_line__name', 'order', 'name')
-        self.fields['category'].label_from_instance = lambda category: f'{category.product_line.name} → {category.name}'
-        self.fields['category'].help_text = 'Choose Product line → Category. The product belongs to that category’s product line.'
         if self.instance.pk:
             variants = ProductVariant.objects.filter(product=self.instance)
             existing = set(variants.values_list('color', flat=True))
@@ -125,14 +86,13 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'product_line', 'products_link', 'is_active', 'order', 'cover_preview']
+    list_display = ['name', 'products_link', 'is_active', 'order', 'cover_preview']
     list_editable = ['is_active', 'order']
-    list_filter = ['product_line', 'is_active']
+    list_filter = ['is_active']
     prepopulated_fields = {'slug': ('name',)}
-    search_fields = ['name', 'product_line__name']
-    fields = ['product_line', 'name', 'slug', 'is_active', 'image', 'featured_product', 'order', 'products_link', 'add_product_link']
+    search_fields = ['name']
+    fields = ['name', 'slug', 'is_active', 'image', 'featured_product', 'order', 'products_link', 'add_product_link']
     readonly_fields = ['products_link', 'add_product_link']
-    list_select_related = ['product_line']
 
     @admin.display(description='Products')
     def products_link(self, obj):
@@ -145,8 +105,8 @@ class CategoryAdmin(admin.ModelAdmin):
     def add_product_link(self, obj):
         if not obj.pk:
             return 'Save the category first.'
-        return format_html('<a href="{}?category={}">+ Add product to {} → {}</a>',
-                           reverse('admin:products_product_add'), obj.pk, obj.product_line, obj.name)
+        return format_html('<a href="{}?category={}">+ Add product to {}</a>',
+                           reverse('admin:products_product_add'), obj.pk, obj.name)
 
     def cover_preview(self, obj):
         if obj.image:
@@ -178,15 +138,12 @@ class CategoryAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
     list_display = [
-        'name', 'order', 'product_line_name', 'category', 'price', 'original_price',
+        'name', 'order', 'category', 'price', 'original_price',
         'discount_badge', 'is_new', 'is_bestseller', 'is_sale', 'is_active', 'created_at'
     ]
-    list_filter = ['category__product_line', 'category', 'is_new', 'is_bestseller', 'is_sale', 'is_active']
-    list_select_related = ['category__product_line']
+    list_filter = ['category', 'is_new', 'is_bestseller', 'is_sale', 'is_active']
+    list_select_related = ['category']
 
-    @admin.display(description='Product line', ordering='category__product_line__name')
-    def product_line_name(self, obj):
-        return obj.category.product_line if obj.category_id else '—'
     list_editable = ['order', 'is_new', 'is_bestseller', 'is_active']
     readonly_fields = ['is_sale', 'discount_preview']
     search_fields = ['name', 'description']
