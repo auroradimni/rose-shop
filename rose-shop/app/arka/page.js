@@ -20,7 +20,8 @@ export default function Checkout() {
     e.preventDefault();
     setState('loading');
     try {
-      const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, items, subtotal, ship, disc, code: applied ? code : null, total }) });
+      const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, items: items.map(({ id, size, color, qty }) => ({ id, size, color, qty })), code: applied ? code : null }) });
+      if (r.status === 409) return setState('stock');
       if (!r.ok) throw new Error();
       dispatch({ type: 'clear' });
       setState('done');
@@ -50,7 +51,8 @@ export default function Checkout() {
         </label>
         <label>Note (optional)<textarea rows="3" value={f.note} onChange={set('note')} /></label>
         <p className="pay">You pay on delivery.</p>
-        {state === 'error' && <p className="err">Your order was not sent. Try again or message us on WhatsApp.</p>}
+        {state === 'stock' && <p className="err" role="alert">Some items are no longer available in the requested quantity. Update your cart and try again.</p>}
+        {state === 'error'  && <p className="err">Your order was not sent. Try again or message us on WhatsApp.</p>}
         <button className="btn" disabled={state === 'loading'}>{state === 'loading' ? 'Sending…' : 'Place order'}</button>
       </form>
       <aside className="summary">
